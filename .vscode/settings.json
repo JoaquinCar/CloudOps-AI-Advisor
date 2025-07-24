@@ -1,6 +1,0 @@
-{
-  "[terraform]": {
-    "editor.defaultFormatter": "hashicorp.terraform"
-  },
-  "terraform.languageServer.enable": true
-}
