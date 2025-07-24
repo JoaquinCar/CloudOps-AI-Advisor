@@ -43,29 +43,6 @@ El corazón del sistema es una función AWS Lambda escrita en Python, que actúa
 
 ## Arquitectura
 
-┌──────────┐ ┌────────────┐ ┌────────────┐
-│ Usuario │ ─────▶ │ Trigger / │ ─────▶ │ Lambda │
-│ / Evento │ │ CloudWatch│ │ Function │
-└──────────┘ └────────────┘ └────────────┘
-│
-▼
-Análisis AI
-│
-▼
-Respuesta JSON
+## Diagrama de la Estructura del Proyecto
 
-## Estructura del repositorio
-
-proyecto-aiops/
-│
-├── aws-aiops-terraform/ # Infraestructura como código
-│ ├── main.tf
-│ ├── variables.tf
-│ └── outputs.tf
-│
-├── lambda/ # Código de función Lambda
-│ ├── index.py
-│ └── lambda_function_payload.zip
-│
-├── .gitignore
-└── README.md
+![Estructura del Proyecto](images/estructura_proyecto.png)
