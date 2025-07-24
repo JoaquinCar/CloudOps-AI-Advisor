@@ -69,3 +69,54 @@ resource "aws_cloudtrail" "cloudtrail" {
     ManagedBy   = "Terraform"
   }
 }
+
+resource "aws_iam_role" "lambda_exec_role" {
+  name = "aiops_lambda_exec_role" # Nombre del rol de ejecución de Lambda, que se usará para otorgar permisos a la función Lambda.
+
+  assume_role_policy = jsonencode({ # Política de confianza que permite a Lambda asumir este rol.
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com" # Principal es el servicio que puede asumir este rol, en este caso Lambda.
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+  role       = aws_iam_role.lambda_exec_role.name                                 # Aquí le dices a qué rol se le adjunta la política.
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" # Esta política otorga permisos básicos de ejecución a la función Lambda, como escribir logs en CloudWatch.
+}
+
+resource "aws_iam_user" "lambda_user" { # Crea un usuario IAM para la función Lambda
+  name = "lambda-exec-user"             # Nombre del usuario IAM, que se usará para otorgar permisos a la función Lambda.
+}
+
+resource "aws_iam_access_key" "lambda_user_key" {
+  user = aws_iam_user.lambda_user.name # Aquí le dices a qué usuario se le crea la clave de acceso.
+}
+
+resource "aws_iam_user_policy_attachment" "lambda_basic_execution" {
+  user       = aws_iam_user.lambda_user.name # Aquí le dices a qué usuario se le adjunta la política.
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_lambda_function" "example_lambda" {
+  function_name = "aiops_example_lambda"                 # Nombre de la función Lambda, que se usará para ejecutar el código.
+  description   = "Función Lambda de ejemplo para AIOps" # Descripción de la función Lambda, que se mostrará en la consola de AWS.
+  handler       = "index.handler"                        # index.py -> def handler(event, context)           # Nombre del archivo y la función que se ejecutará cuando se invoque la función Lambda. Aquí, "index" es el nombre del archivo (sin extensión) y "handler" es la función dentro de ese archivo.
+  runtime       = "python3.11"
+  role          = aws_iam_role.lambda_exec_role.arn
+
+  filename         = "lambda_function_payload.zip"                   # Archivo ZIP que contiene el código de la función Lambda. Debes crear este archivo antes de aplicar la configuración de Terraform.
+  source_code_hash = filebase64sha256("lambda_function_payload.zip") # Hash del código fuente para verificar que no ha cambiado desde la última implementación.
+
+  environment {
+    variables = {
+      ENV = var.environment
+    }
+  }
+}
+
