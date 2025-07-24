@@ -4,3 +4,7 @@
 .vscode/
 # Evita archivo gigante de provider descargado
 .terraform/providers/registry.terraform.io/hashicorp/aws/6.4.0/windows_amd64/terraform-provider-aws_v6.4.0_x5.exe
+aws-aiops-terraform/terraform.tfstate
+# Evita archivo de lock de terraform
+.terraform.lock.hcl
+
